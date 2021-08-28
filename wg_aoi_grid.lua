@@ -93,7 +93,6 @@ function mt:set(id, x, y)
 end
 
 function mt:leave(id)
-    --
     local cur_actor = self.map_actor[id]
     if not cur_actor then
         return
@@ -102,8 +101,8 @@ function mt:leave(id)
     local d_cur_grid = self:get_grid_no(cur_actor.x, cur_actor.y)
     self.map_actor[id] = nil
     self:del_grid_member(d_cur_grid, id)
-
-    return d_cur_grid
+    local vision = self:get_full_vision_grids(d_cur_grid)
+    return d_cur_grid, vision
 end
 
 function mt:get_grid_no(x, y)
