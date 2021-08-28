@@ -1,5 +1,3 @@
-package.path = package.path .. ";./?.lua"
-
 local WgAoi = require "wg_aoi_grid"
 
 local function print_r (msg, t )
@@ -57,16 +55,18 @@ tb_area:set(13, 3, 1)
 tb_area:set(14, 10, 10)
 tb_area:set(16, 100, 10)
 
-tb_area:leave(12)
+local d_old_grid, disappears = tb_area:leave(12)
 
 tb_area:print_aoi()
 
-local d_cur_grid, d_old_grid, new_vision, appears, disappears = tb_area:set(15, 9, 9)
-print_r(" == d_cur_grid ==", d_cur_grid)
-print_r(" == d_old_grid ==", d_old_grid)
-print_r(" == new_vision ==", new_vision)
-print_r(" == appears ==", appears)
-print_r(" == disappears ==", disappears)
+-- local d_cur_grid, d_old_grid, new_vision, appears, disappears = tb_area:set(15, 9, 9)
+-- local d_cur_grid, d_old_grid, new_vision, appears, disappears = tb_area:set(13, 90, 79)
+
+print_r("== d_cur_grid ==", d_cur_grid)
+print_r("== d_old_grid ==", d_old_grid)
+print_r("== new_vision ==", new_vision)
+print_r("== appears ==", appears)
+print_r("== disappears ==", disappears)
 
 print("== end ==")
 
