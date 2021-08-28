@@ -115,24 +115,36 @@ end
 
 
 function mt:get_full_vision_grids(d_grid)
-    local no_y = d_grid // self.grid_x
-    local no_x = math.fmod(d_grid, self.grid_x)
-    local lst = {
-        self:get_grid_no(no_x - 1, no_y - 1),
-        self:get_grid_no(no_x - 1, no_y    ),
-        self:get_grid_no(no_x - 1, no_y + 1),
-        self:get_grid_no(no_x    , no_y - 1),
-        self:get_grid_no(no_x    , no_y    ),
-        self:get_grid_no(no_x    , no_y + 1),
-        self:get_grid_no(no_x + 1, no_y - 1),
-        self:get_grid_no(no_x + 1, no_y    ),
-        self:get_grid_no(no_x + 1, no_y + 1),
-    }
-    for key, idx in pairs(lst) do
-        if idx < 0 or idx > self.grid_max then
-            table.remove(lst, key)
+    local lst_z = {}
+    local lst_y = {d_grid}
+
+    local b_first_y = d_grid <= self.grid_x
+    local b_last_y  = self.grid_y == 1 or d_grid > self.grid_max - self.grid_x
+
+    local b_first_x = self.grid_x == 1 or math.fmod(d_grid, self.grid_x) == 1
+    local b_last_x  = math.fmod(d_grid, self.grid_x) == 0
+
+    if not b_first_y and not b_last_y then
+        table.insert(lst_y, d_grid - self.grid_x)
+        table.insert(lst_y, d_grid + self.grid_x)
+    elseif b_first_y and not b_last_y then
+        table.insert(lst_y, d_grid + self.grid_x)
+    elseif b_last_y and not b_first_y then
+        table.insert(lst_y, d_grid - self.grid_x)
+    end
+
+    for _, yy in pairs(lst_y) do
+        table.insert(lst_z, yy)
+        if not b_first_x and not b_last_x then
+            table.insert(lst_z, yy+1)
+            table.insert(lst_z, yy-1)
+        elseif b_first_x and not b_last_x then
+            table.insert(lst_z, yy+1)
+        elseif b_last_x and not b_first_x then
+            table.insert(lst_z, yy-1)
         end
     end
+    return lst_z
 end
 
 -- appears    = new_vision - old_vison
