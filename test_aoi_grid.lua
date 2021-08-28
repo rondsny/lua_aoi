@@ -2,6 +2,42 @@ package.path = package.path .. ";./?.lua"
 
 local WgAoi = require "wg_aoi_grid"
 
+local function print_r (msg, t )
+    print(msg)
+
+    local print_r_cache={}
+    local function sub_print_r(t,indent)
+        if (print_r_cache[tostring(t)]) then
+            print(indent.."*"..tostring(t))
+        else
+            print_r_cache[tostring(t)]=true
+            if (type(t)=="table") then
+                for pos,val in pairs(t) do
+                    if (type(val)=="table") then
+                        print(indent.."["..pos.."] => "..tostring(t).." {")
+                        sub_print_r(val,indent..string.rep(" ",string.len(pos)+8))
+                        print(indent..string.rep(" ",string.len(pos)+6).."}")
+                    elseif (type(val)=="string") then
+                        print(indent.."["..pos..'] => "'..val..'"')
+                    else
+                        print(indent.."["..pos.."] => "..tostring(val))
+                    end
+                end
+            else
+                print(indent..tostring(t))
+            end
+        end
+    end
+    if (type(t)=="table") then
+        print(tostring(t).." {")
+        sub_print_r(t,"  ")
+        print("}")
+    else
+        sub_print_r(t,"  ")
+    end
+    print()
+end
+
 local tb_area = WgAoi.new_area({
     cap       = 100,
     min_x     = 0,
@@ -19,12 +55,18 @@ tb_area:set(11, 0, 0)
 tb_area:set(12, 3, 0)
 tb_area:set(13, 3, 1)
 tb_area:set(14, 10, 10)
-local d_cur_grid, d_old_grid, new_vision, appears, disappears = tb_area:set(15, 9, 9)
 tb_area:set(16, 100, 10)
 
 tb_area:leave(12)
 
 tb_area:print_aoi()
+
+local d_cur_grid, d_old_grid, new_vision, appears, disappears = tb_area:set(15, 9, 9)
+print_r(" == d_cur_grid ==", d_cur_grid)
+print_r(" == d_old_grid ==", d_old_grid)
+print_r(" == new_vision ==", new_vision)
+print_r(" == appears ==", appears)
+print_r(" == disappears ==", disappears)
 
 print("== end ==")
 
