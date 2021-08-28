@@ -18,8 +18,6 @@ function M.new_area(args)
     local grid_y = math.ceil((args.max_y - args.min_y + 1) / (grid_size))
     local grid_max = grid_x * grid_y
 
-    -- print("grid_x =", grid_x, grid_y, grid_max)
-
     local tb_area = {
         cap   = args.cap,
 
@@ -53,39 +51,40 @@ end
 -- disappears -- 需要被通知id消失了，需要通知id消失了disappears
 function mt:set(id, x, y)
     if x < self.min_x or x > self.max_x or
-        y < self.min_y or y > self.max_y then
+        y < self.min_y or y > self.max_y
+    then
     --
         print("not in arean", id, x, y)
         return
     end
 
-    local d_cur_grid = self:get_grid_no(x, y)
+    local d_cur_grid = self:_get_grid_no(x, y)
     local new_actor = {id = id, x = x, y = y}
     local old_actor = self.map_actor[id]
     self.map_actor[id] = new_actor
 
     if not old_actor then
         -- 新增
-        self:add_grid_member(d_cur_grid, id)
-        local appears = self:get_full_vision_grids(d_cur_grid)
+        self:_add_grid_member(d_cur_grid, id)
+        local appears = self:_get_full_vision_grids(d_cur_grid)
         return d_cur_grid, nil, appears, appears, {}
     elseif old_actor.x == x and old_actor.y == y then
         -- 位置不变
-        local vision = self:get_full_vision_grids(d_cur_grid)
+        local vision = self:_get_full_vision_grids(d_cur_grid)
         return d_cur_grid, d_cur_grid, vision, {}, {}
     else
-        local d_old_grid = self:get_grid_no(old_actor.x, old_actor.y)
+        local d_old_grid = self:_get_grid_no(old_actor.x, old_actor.y)
         if d_cur_grid == d_old_grid then
             -- 格子内移动
-            local vision = self:get_full_vision_grids(d_cur_grid)
+            local vision = self:_get_full_vision_grids(d_cur_grid)
             return d_cur_grid, d_cur_grid, vision, {}, {}
         else
             -- 跨格子移动
-            self:add_grid_member(d_cur_grid, id)
-            self:del_grid_member(d_old_grid, id)
-            local new_vision = self:get_full_vision_grids(d_cur_grid)
-            local old_vision = self:get_full_vision_grids(d_old_grid)
-            local appears, disappears = self:diff(new_vision, old_vision)
+            self:_add_grid_member(d_cur_grid, id)
+            self:_del_grid_member(d_old_grid, id)
+            local new_vision = self:_get_full_vision_grids(d_cur_grid)
+            local old_vision = self:_get_full_vision_grids(d_old_grid)
+            local appears, disappears = self:_diff(new_vision, old_vision)
 
             return d_cur_grid, d_old_grid, new_vision, appears, disappears
         end
@@ -98,14 +97,20 @@ function mt:leave(id)
         return
     end
 
-    local d_cur_grid = self:get_grid_no(cur_actor.x, cur_actor.y)
+    local d_cur_grid = self:_get_grid_no(cur_actor.x, cur_actor.y)
     self.map_actor[id] = nil
-    self:del_grid_member(d_cur_grid, id)
-    local vision = self:get_full_vision_grids(d_cur_grid)
+    self:_del_grid_member(d_cur_grid, id)
+    local vision = self:_get_full_vision_grids(d_cur_grid)
     return d_cur_grid, vision
 end
 
-function mt:get_grid_no(x, y)
+function mt:get_ids_by_grid(d_grid)
+    --
+end
+
+------------------------------------------------------------------------------
+
+function mt:_get_grid_no(x, y)
     local gx = math.ceil((x - self.min_x + 1) / self.grid_size)  -- x轴第几段
     local gy = math.ceil((y - self.min_y + 1) / self.grid_size)  -- y轴第几段
     local no = gx + self.grid_x * (gy - 1)
@@ -113,7 +118,7 @@ function mt:get_grid_no(x, y)
 end
 
 
-function mt:get_full_vision_grids(d_grid)
+function mt:_get_full_vision_grids(d_grid)
     local lst_z = {}
     local lst_y = {d_grid}
 
@@ -149,7 +154,7 @@ end
 -- appears    = new_vision - old_vison
 -- disappears = old_vison - new_vision
 -- 优化： 可以一次遍历？如果是有序的，可以
-function mt:diff(new_vision, old_vision)
+function mt:_diff(new_vision, old_vision)
     local appears = {}
     local disappears = {}
 
@@ -177,12 +182,12 @@ function mt:diff(new_vision, old_vision)
     return appears, disappears
 end
 
-function mt:add_grid_member(d_grid, id)
+function mt:_add_grid_member(d_grid, id)
     local lst_grid = self.lst_grid
     table.insert(lst_grid[d_grid], id)
 end
 
-function mt:del_grid_member(d_grid, id)
+function mt:_del_grid_member(d_grid, id)
     local lst_grid = self.lst_grid
     for k,v in pairs(lst_grid[d_grid]) do
         if v == id then
