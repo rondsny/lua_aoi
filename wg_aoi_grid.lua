@@ -105,7 +105,12 @@ function mt:leave(id)
 end
 
 function mt:get_ids_by_grid(d_grid)
-    --
+    local ids = self.lst_grid[d_grid]
+    if not ids then
+        return {}
+    end
+
+    return ids
 end
 
 ------------------------------------------------------------------------------
